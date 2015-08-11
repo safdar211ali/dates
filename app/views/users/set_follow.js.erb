@@ -1,0 +1,1 @@
+$('div.common_box li#set_follow_<%= @user.username %>').html("<%= escape_javascript( render :partial => "/users/follow_user", :locals => {:user => @user} ) %>")

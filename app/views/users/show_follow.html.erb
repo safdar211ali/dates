@@ -1,0 +1,15 @@
+<% provide(:title, @title) %>
+<div class="row" style="margin-left:20px;">
+  <aside class="span4">
+    <section>
+      <h1><%= @id %></h1>
+      <span><%= link_to "view my profile", @user %></span>
+
+    </section>
+   
+  </aside>
+  <div class="span8">
+    <h3><%= @title %></h3>
+	<div class = "box_detail" style="margin-left:2px;" >
+		<%= render @users %>
+	</div>

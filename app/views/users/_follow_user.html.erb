@@ -1,0 +1,5 @@
+<% if current_user.following?(@user) %>
+  <%= link_to "UnFollow", users_set_follow_path(:id => user), class: 'users save_btn', remote: true %>
+<% else %>
+  <%= link_to "Follow", users_set_follow_path(:id => user), class: 'users save_btn', remote: true %>
+<% end %>

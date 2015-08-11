@@ -1,0 +1,15 @@
+<div class="sm_form_container" style="height: 160px;">
+<h1>Reset Password</h1>
+
+<%= form_tag password_resets_path, :method => :post do %>
+      <div class="row">
+          <div class="field">
+            <label for="email" style="font-size: 20px; padding-right: 10px; padding-top: 6px;">Email:</label>
+            <%= text_field_tag :email, params[:email], :style => 'width:300px;' %>
+          </div>
+      </div>
+      <div class="field">
+        <%= submit_tag "Reset Password", class: 'btn' %>
+      </div>
+<% end %>
+</div>

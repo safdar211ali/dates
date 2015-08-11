@@ -1,0 +1,73 @@
+<% if flash[:notice] %>
+<p class="flash"><%= flash[:notice] %></p>
+<% end %>
+
+<%= form_for(:question, :url => question_answers_path(question)) do |f| %>
+	<div class='form_container' style='width: 100%;border: 0 none;'>
+		<ul style='list-style: none;'>
+			<li><%= f.text_area :answer, {:placeholder => 'Write your answer here...' , :style=>'width:97%;height:50px;resize: none; border: 1px solid #AAA; padding: 10px; margin-bottom: 10px;'} %></li>
+			<li><%= hidden_field_tag :recipient_id, {:placeholder => 'Please add your name...' , :style=>'width:97%;border: 1px solid #AAA; padding: 10px; margin-bottom: 10px;'}  %></li>
+			<li>
+              <%= f.submit "Respond", :class => 'find_btn', :style=>'margin:0' %>
+              <div class="social_network">
+                <span style="margin-left: -22px;">Twitter</span>
+                <%= check_box_tag :twitter, true %>
+              </div>
+              <div class="social_network">
+                <span>Facebook</span>
+                <%= check_box_tag :facebook, true %>
+              </div>
+            </li>
+		</ul>
+    </div>
+<% end %>
+
+<script type="text/javascript">
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId  : '493696170783447',
+            status : true,
+            cookie : true, 
+            xfbml  : true 
+        });
+    };
+
+    (function(d) {
+        var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        d.getElementsByTagName('head')[0].appendChild(js);
+    }(document));
+
+    $(function() {
+        if(<%= current_user_has_fb_access_token? %> == false)
+        {
+            $("#facebook").click(function (e) {
+                if (this.checked) {
+                    FB.login(function(response) {
+                        if (response.authResponse) {                           
+                            $.getJSON('/auth/facebook/callback', function(json) {
+                                e.stopPropagation();
+                                return true;
+                            });
+                        }
+                    }, { scope: 'user_about_me, publish_actions, manage_pages' }); // These are the permissions you are requesting
+                }
+            });
+        }
+
+    });
+
+
+  if(<%= current_user_has_tw_access_token? %> == false){
+      $("#twitter").click(function(e) {
+          if(this.checked) {
+              var left = (screen.width/2)-(400/2);
+              var top = (screen.height/2)-(400/2);
+              window.open('<%= authorize_twitter_url(:target_profile_id => current_user.id) %>', "", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+400+', height='+400+', top='+top+', left='+left);
+              e.stopPropagation();
+              return true;
+          }
+      });
+  }
+</script>

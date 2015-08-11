@@ -1,0 +1,225 @@
+- if flash[:notice]
+   .notice
+	 = flash[:notice]
+.row style='#{random_background};margin:0;float:left;width:100%;'
+  .wrapper
+    #top_sec
+        fieldset
+          .search_box
+            h1 Search and find a mate.
+            = form_tag searches_path, method: :get, id: "basic_search" do
+              span.secrch_box_bg
+                input.text_input name='search' type="text" placeholder="e.g (female), likes dogs, has a job)" value="#{@search.input_text}"
+                input.find_btn type="submit" value="Find" /
+          h4
+            | or use our
+            a.adv_search href="#"
+              = image_tag "adv_link.png"
+              span Advanced Search
+        .advanced_search_div.hide
+          = form_tag searches_path, method: :get, id: "adv_search" do
+              .form_container
+                .row style='padding-top: 20px !important;'
+                  .col
+                      label I am a
+
+                      = select_tag :sexuality, options_for_select(['Straight', 'Gay', 'Bisexual'], @search.sexuality)
+
+
+                  .select2
+                    .col style="width:60px;"
+					  label Seeking
+					.col5 style="float:left;"
+					  - gender = @search.gender.present? ? @search.gender.split(',') : nil
+                      = select_tag :gender, options_for_select([['Men','Male'], ['Women', 'Female']], gender), multiple: true, class: "SlectBox", id: "gender"
+                .row
+				  .select1
+					.col.col3.col33 style='width:175px;'
+					  label Ages
+					  - min_age = @search.min_age || 18
+					  = select_tag :min_age, options_for_select((18..65), min_age), {class: 'small'}
+
+				  .select5
+					.col.col4
+					  label to
+					  - max_age = @search.max_age || 65
+					  = select_tag :max_age, options_for_select((20..65), max_age), {class: 'small'}
+
+                  .select4
+                  .col5 style="float:left; margin-left:15px; width: 245px;"
+					  - ethnicity = @search.ethnicity.present? ? @search.ethnicity.split(',') : nil
+                      = select_tag :ethnicity, options_for_select(['Asian', 'Black', 'Biracial', 'Indian', 'Hispanic/Latin', 'Middle Eastern', 'Native American', 'Pacific Islander', 'White', 'Other'], ethnicity), multiple: true, class: "SlectBox", id: "ethnicity"
+
+                .row
+                  .col.col5 style='margin-right:18px;'
+                    label Near
+                    input.text_input name='zip_code' type="text" placeholder="enter zip here" value="#{@search.zip_code}"
+
+
+				  .col5 style="width: 180px; float:left;"
+				    - children = @search.children.present? ? @search.children.split(',') : nil
+					= select_tag :children, options_for_select(['I want kids now','I want one someday', 'Yes they live with me'], children), multiple: true, class: "SlectBox", id: "children"
+
+
+                  .select5
+                      - religion = @search.religion.present? ? @search.religion.split(',') : nil
+					  = select_tag :religion, options_for_select(['Agnostic', 'Atheist', 'Christian', 'Catholic', 'Buddhist', 'Hindu', 'Jewish', 'Muslim', 'Other'], religion), multiple: true, class: "SlectBox", id: "relegion"
+					  input.adv_text_input name='search' type="hidden" value="#{@search.input_text}"
+
+                .btm_sec style='margin-top:20px;'
+                  ul.form_list
+                    li
+                      a href="#" id="save_search"
+                        = image_tag "form_icon1.png"
+                        span.color Save this Search
+                    li
+                      a href="/searches/load_search"
+                        = image_tag "form_icon2.png"
+                        span Load
+                    li
+                      a href="/searches" id="reset_form"
+                        = image_tag "form_icon3.png"
+                        span Reset
+                  input.find_btn type="submit" value="Find" /
+              .btm_search_detail
+                a.simple_search href="#"
+                  = image_tag  "simple_search_icon.png"
+                  span Simple Search
+
+  #btm_container
+    .wrapper
+      .box_detail
+        = render collection: @users, partial: 'users/user', as: :user
+	  - if params[:controller] == "users"
+		button onclick="getMoreRecords(); return false;" id='more_button' /
+	input name='more' type='hidden' value='2' id='more_users'
+  #message_me.mfp-hide
+    center
+      .message_div.send-a-message-div
+        = form_tag messages_path, method: :post, remote: true, class:'form-horizontal',id: 'message_form', role: 'form'
+          = hidden_field_tag :user, nil
+          .form-group
+            = hidden_field_tag :subject, "#{@current_user} messaged you", class: 'form-control'
+          .form-group
+            = label_tag :body, 'Your Message', class: 'control-label'
+            hr
+            .common_sec
+            = text_area_tag :body, nil, class: 'form-control'
+          = submit_tag 'Send', class: 'btn btn-primary home-page'
+  #report_me.mfp-hide
+    center
+      .message_div
+        = render 'contacts/form'
+  #contact_me.mfp-hide
+    center
+      .message_div
+        = render 'contacts/form'
+  #follow_div.mfp-hide
+    center
+      .message_div#follow_user
+  javascript:
+    $('.common_box').mouseenter(function(){
+      $(this).find('.btn_link').show()
+    }).mouseleave(function(){
+      $(this).find('.btn_link').hide()
+    })
+    $('.message_btn').magnificPopup()
+    $('.report_btn').magnificPopup()
+    $('form#message_form').bind('ajax:success', function(evt, data, status, xhr){
+        $.magnificPopup.close()
+      })
+    $('.save_btn').magnificPopup()
+    $(window).scroll(function() {
+	   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+	   if ($('#more_button').is(':visible')) {
+         $('#more_button').trigger('click');
+        }
+	   }
+	});
+
+	function getMoreRecords(){
+		var pageOffset = $('#more_users').val();
+		var order = "#{@order}";
+		$('#more_button').hide();
+		var url = "/users?"+"page=" + pageOffset + "&order=" + order;
+		$.ajax({
+			url: url,
+			method: 'GET',
+			success: function(html_data){
+				// make jQuery object from HTML string
+				var $moreBlocks = jQuery( html_data );
+				$moreBlocks.css('display','none');
+				$(".box_detail").append($moreBlocks).imagesLoaded(
+                        function(){
+                            $moreBlocks.fadeIn(1000);
+                            $(".box_detail").masonry('appended', $moreBlocks);
+
+                            isFetchingPics = false;
+                        }
+                    );
+				Cufon.refresh();
+				$( ".common_box" ).mouseenter(function() {
+				  $(this).find(".btn_link").show();
+				}).mouseleave(function() {
+				  $(this).find(".btn_link").hide();
+				});
+				if($moreBlocks.length == 4){
+					$('#more_users').val((parseInt(pageOffset) + 1));
+					$('#more_button').show();
+				}
+				$('.message_btn').magnificPopup();
+				$('.report_btn').magnificPopup();
+				$('.message_btn').click(function () {
+				  var user_id = $(this).data('user');
+				  $('#user').val(user_id);
+				  var avatar_url = $("#image_" + user_id).attr('src');
+				  var username = $("#name_" + user_id).val();
+				  var age = $("#age_" + user_id).val();
+				  var gender = $("#gender_" + user_id).val();
+				  var sexuality = $("#sexuality_" + user_id).val();
+				  var city = $("#city_" + user_id).val();
+				  var state = $("#state_" + user_id).val();
+				  var html_content = "<div class=\"commoon_sec\">" +
+							  "<div class=\"left_sec\"><img alt=\"Popup baby\" src=\"" + avatar_url + "\"></div>" +
+							  "<div class=\"right_sec\" style=\"position:relative;\">" +
+							  "<div class=\"top_box\" style=\"position:absolute; border: 1px solid #cccccc; width: 456px; border-radius: 6px; height: 140px; background-color: #F7F7F7;\">" +
+							  "<div class=\"left_box\" style=\"float:right; text-align:left; width: 68%;\">" +
+							  "<h2>" + username + "</h2><h3>" + age + ", " + gender + ", " + sexuality + "</br>" +
+							  city + ", " + state + "</h3></div></div></div></div>";
+				  $("div.common_sec").html(html_content);
+				  Cufon.refresh();
+				});
+				$('form#message_form').bind('ajax:success', function(evt, data, status, xhr){
+					$.magnificPopup.close()
+				  });
+				$('.save_btn').magnificPopup();
+			}
+
+		});
+	 }
+
+	 $("#relegion, #gender, #children, #ethnicity").on('change', function(){
+		return false;
+	 });
+
+	 $("#basic_search input.text_input").on('keyup', function(){
+	   $("input.adv_text_input").val(this.value);
+	 });
+
+	 $("#reset_form").on('click', function(){
+	   $("form#adv_search").trigger('reset');
+	   $("form#basic_search").trigger('reset');
+	   $("input.adv_text_input").val("");
+	 });
+
+	 $("#basic_search").submit(function(e){
+		$('form#adv_search').submit();
+		e.preventDefault();
+	 });
+
+	 $("#save_search").on("click", function () {
+          $('form#adv_search').attr('action', "/searches/save_searches");
+          $('form#adv_search').submit();
+          e.preventDefault();
+      });
+

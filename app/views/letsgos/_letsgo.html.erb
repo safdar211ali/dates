@@ -1,0 +1,20 @@
+<% @letsgos.each_with_index do |letsgo, i| %>
+    <li class="<%= letsgo_icon_class(letsgo) %>">
+        <div class="<%= 'without_user' unless current_user?(letsgo.user) %> form_actions">
+          <% if current_user?(letsgo.user) %>
+              <%= link_to "delete", letsgo, method: :delete, data: { confirm: "You sure?" }, remote: true, :class => 'letsgo_delete' %>
+          <% end %>
+          <% unless current_user?(letsgo.user) %>
+              <% if current_user.interested_users_letsgos.where(:letsgo_id => letsgo.id).present? %>
+                <span>I'm Interested</span>
+              <% else %>
+                <%= link_to "I'm Interested", interested_letsgo_path(letsgo), method: :post, :id => "interested" %>
+              <% end %> |
+              <%= link_to "repost", repost_letsgo_path(letsgo), method: :post, :id => "repost" %>
+          <% end %>
+        </div>
+        <b class="<%= 'without_user' unless current_user?(letsgo.user) %> details">
+            Let's Go...<span class="content"><%= letsgo.content %></span>
+        </b>
+    </li>
+<% end %>
